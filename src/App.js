@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react"
 import { fabric } from "fabric"
 import { useState } from "react"
 import { FileUploader } from "react-drag-drop-files"
+import FabricCanvas from "./components/FabricCanvas"
 
 fabric.Object.prototype.transparentCorners = false
 let canvas = new fabric.Canvas("canva", {
@@ -25,14 +26,14 @@ function App() {
 	// 		height: 500,
 	// 		backgroundColor: "red",
 	// 	})
-  //   const canvas2 = initCanvas();
-  // canvas2.on("mouse:move",(e)=>{
-  //   const mE = e.e;
-  //   const dalta = new fabric.Point(mE.movementX,mE.movementY);
-  //   canvas2.relativePan(dalta);
-  //   console.log(mE.movementX,mE.movementY);
-   
-  // })
+	//   const canvas2 = initCanvas();
+	// canvas2.on("mouse:move",(e)=>{
+	//   const mE = e.e;
+	//   const dalta = new fabric.Point(mE.movementX,mE.movementY);
+	//   canvas2.relativePan(dalta);
+	//   console.log(mE.movementX,mE.movementY);
+
+	// })
 	// useEffect(() => {
 	// 	setCanvas(initCanvas())
 	// }, [])
@@ -43,17 +44,16 @@ function App() {
 	// onAddCircle use for add circle in canvas
 	const onAddCircle = () => {
 		// editor?.addCircle()
-    const circle = new fabric.Circle({
-      radius: 20,
-      fill: 'green',
-      left: 100,
-      top: 100
-    });
-    editor?.canvas.add(circle);
-    circle.on('selected', function() {
-      console.log(circle.toJSON());
-    }
-    );
+		const circle = new fabric.Circle({
+			radius: 20,
+			fill: "green",
+			left: 100,
+			top: 100,
+		})
+		editor?.canvas.add(circle)
+		circle.on("selected", function () {
+			console.log(circle.toJSON())
+		})
 	}
 
 	const onAddRectangle = () => {
@@ -65,11 +65,11 @@ function App() {
 		console.log(editor?.canvas.height)
 	}
 	const addText = () => {
-		const text = new fabric.IText("hello world", {
+		const text = new fabric.Text("hello world", {
 			left: 100,
 			top: 100,
 			fontFamily: "helvetica",
-			fill: "#333",
+			fill: "#F79327",
 			fontSize: 50,
 		})
 		editor?.canvas.add(text)
@@ -94,7 +94,7 @@ function App() {
 					editor?.canvas.add(img)
 					img.scaleToWidth(100)
 					img.scaleToHeight(100)
-          console.log(img.toJSON());
+					console.log(img.toJSON())
 			  })
 			: new fabric.Image.fromURL(
 					"https://www.picclickimg.com/C-IAAOSwtkNfx~od/Naruto-Ninja-Arena-jeu-de-societe-naroto.webp",
@@ -110,21 +110,24 @@ function App() {
 						)
 						// build
 						editor?.canvas.add(img)
-						img.scaleToWidth(100)
-						img.scaleToHeight(100)
+						img.on("mouse:dblclick", (e) => {
+							console.log(e.target)
+						})
+						img.scaleToWidth(400)
+						img.scaleToHeight(400)
 					}
 			  )
 	}
-	const addTextBox = () => {
-		const text = new fabric.Textbox("hello world", {
-			left: 100,
-			top: 100,
-			fontFamily: "Comic Sans",
-			fill: "#333",
-			fontSize: 50,
-		})
-		editor?.canvas.add(text)
-	}
+	// const addTextBox = () => {
+	// 	const text = new fabric.Textbox("hello world", {
+	// 		left: 100,
+	// 		top: 100,
+	// 		fontFamily: "Comic Sans",
+	// 		fill: "#F79327",
+	// 		fontSize: 50,
+	// 	})
+	// 	editor?.canvas.add(text)
+	// }
 	const addPolygon = () => {
 		const polygon = new fabric.Polygon(
 			[
@@ -151,10 +154,7 @@ function App() {
 		path.set({ fill: "red", stroke: "green", opacity: 0.5 })
 		editor?.canvas.add(path)
 	}
-	// delete function
-	const deleteObject = () => {
-		editor?.canvas.getActiveObject()?.remove()
-	}
+
 
 	let draggedImg = ""
 	let group = new fabric.Group()
@@ -181,33 +181,64 @@ function App() {
 		setFile(files)
 	}
 
+	const deleteHadler = () => {
+		const activeObject = editor?.canvas.getActiveObject()
+		editor?.canvas.remove(activeObject)
+	}
+	const hadleDeleteAll = () => {
+		editor?.canvas.clear()
+	}
 
+	//  filter 
+	const handleSetBlackAndWhite = () => {
+		const activeObject = editor?.canvas.getActiveObject()
+		activeObject.filters.push(new fabric.Image.filters.Grayscale())
+		activeObject.applyFilters()
+		editor?.canvas.renderAll()
+	}
+	// set to hue
+	const handleInvert = () => {
+		const activeObject = editor?.canvas.getActiveObject()
+		activeObject.filters.push(new fabric.Image.filters.Invert())
+		activeObject.applyFilters()
+		editor?.canvas.renderAll()
+	}
+	// handle save as json
+	const save = () => {
+		const json = JSON.stringify(editor?.canvas.toJSON())
+		console.log(json)
+		// const saveJSON = editor?.canvas.toJSON()
+		// console.log(saveJSON)
+		// const kanvas = new fabric.Canvas("canvas")
+		// kanvas.toJSON(saveJSON)
+		// kanvas.loadFromJSON(saveJSON)
+		// alert(JSON.stringify(saveJSON))
+		
+		// fabric.log('JSON with additional properties included: ', editor.canvas.toJSON(['lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'lockUniScaling']));
+	}
+	// working
+	const handleSave = () => {
+		const activeObject = editor?.canvas.getActiveObject()
+		const json = JSON.stringify(activeObject.toJSON())
+		console.log(json)
+	}
 
-  const deleteHadler = ()=>{
-    const activeObject = editor?.canvas.getActiveObject();
-    editor?.canvas.remove(activeObject);
-  }
-  const hadleDeleteAll = ()=>{
-    editor?.canvas.clear();
-  }
+	// try filter
+	const [filter, setFilter] = useState({
+		filterName: "grayscale",
+		options: {},
+	})
+	const handleChangeFilter = (e) => {
+		setFilter({
+			filterName: e.target.value,
+			options: {},
+		})
+	}
 
-  // save implement
-//   let saveJSON = editor?.canvas.toJSON()
-//   // let saveJSON = '{"version":"2.4.1","objects":[{"type":"rect","version":"2.4.1","originX":"left","originY":"top","left":0,"top":0,"width":100,"height":100,"fill":"rgb(0,0,0)","stroke":null,"strokeWidth":1,"strokeDashArray":null,"strokeLineCap":"butt","strokeLineJoin":"miter","strokeMiterLimit":4,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"shadow":null,"visible":true,"clipTo":null,"backgroundColor":"","fillRule":"nonzero","paintFirst":"fill","globalCompositeOperation":"source-over","transformMatrix":null,"skewX":0,"skewY":0,"rx":0,"ry":0,"name":"Nono"}],"background":"#222", "width": "300", "height": "500"}'
-// const kanvas = new fabric.Canvas("canvas");
-// kanvas.loadFromJSON(saveJSON)
-
-
-// hadle save and convert fabric to json
-const save = ()=>{
-  const saveJSON = editor?.canvas.toJSON()
-  console.log(saveJSON);
-  const kanvas = new fabric.Canvas("canvas");
-  kanvas.loadFromJSON(saveJSON)
-alert(JSON.stringify(saveJSON)  )
-}
-
-
+	const webglBackend = new fabric.WebglFilterBackend()
+	const canvas2dBackend = new fabric.Canvas2dFilterBackend()
+	fabric.filterBackend = fabric.initFilterBackend()
+	fabric.Object.prototype.transparentCorners = false
 
 	return (
 		<div className='App'>
@@ -216,20 +247,19 @@ alert(JSON.stringify(saveJSON)  )
 			<button onClick={() => addImage("")}>Add Image</button>
 			<button onClick={onAddLine}>Add Line</button>
 			<button onClick={addText}>Add Text</button>
-			<button onClick={addTextBox}>Add Text Box</button>
+			{/* <button onClick={addTextBox}>Add Text Box</button> */}
 			<button onClick={addPath}>Add Path</button>
-      <button onClick={deleteHadler}>Delete</button>
-      <button onClick={hadleDeleteAll}>Delete All</button>
-			
+			<button onClick={deleteHadler}>Delete</button>
+			<button onClick={hadleDeleteAll}>Delete All</button>
 			<button onClick={addPolygon}>Add Polygon</button>
-      <button onClick={save}>Save</button>
+			<button onClick={save}>Save</button>
 
 			<input
 				type='file'
 				accept='image/*'
 				onChange={(e) => handleUpload(e)}
 			/>
-     
+
 			{image && (
 				<canvas
 					width={image.width}
@@ -244,14 +274,33 @@ alert(JSON.stringify(saveJSON)  )
 					/>
 				</canvas>
 			)}
+			<h1>filter</h1>
+			<div>
+				black white
+				<input onClick={handleSetBlackAndWhite} type='checkbox' />
+				<button onClick={handleInvert}>Invert</button>
+				<button onClick={handleSave}>Save</button>
+			</div>
+			<label>
+				<span>Invert:</span>{" "}
+				<input
+					type='checkbox'
+					id='invert'
+				/>
+			</label>
+			<label>
+				<span>Brightness:</span>{" "}
+				<input
+					type='checkbox'
+					id='brightness'
+				/>
+			</label>
 
-			{/* <canvas id="irgendeineincanvasobjekt" width="500" height="500"></canvas> */}
-
-			<FabricJSCanvas
-				editable={true}
+			<FabricJSCanvas 
+			
+				// editable={true}
 				onReady={onReady}
-				className='sample-canvas'
-       
+				className='canvas '
 			/>
 		</div>
 	)
