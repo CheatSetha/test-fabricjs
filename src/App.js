@@ -425,6 +425,30 @@ function App() {
 		console.log(json);
 
 	}
+	// handle upload multiple images 
+	const handleUploadMultipleImages = (e)=>{
+		const files = e.target.files;
+		const loadedImages = []
+		for(let i = 0; i < files.length; i++){
+			const file = files[i]
+			const reader = new FileReader()
+			reader.onload = ()=>{
+				const dataUrl = reader.result
+				loadedImages.push(dataUrl)
+				console.log(loadedImages);
+				// add url img to fabric js
+				fabric.Image.fromURL(dataUrl, (img) => {
+					editor?.canvas.add(img)
+					img.scaleToWidth(500)
+					img.scaleToHeight(500)
+				})
+			}
+			reader.readAsDataURL(file)
+		}
+	}
+
+
+
 	
 
 
@@ -553,6 +577,7 @@ function App() {
 			<button onClick={saveAsSVGWithFileSaver}>
 				Save as SVG with file saver
 			</button>
+			<input type="file" multiple onChange={handleUploadMultipleImages}/> b sl o
 			<input
 				type='file'
 				onChange={handleUploadImage}
